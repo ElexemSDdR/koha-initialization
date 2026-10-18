@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+echo "Actualizando el sistema\n"
+sudo apt update && sudo apt upgrade
+echo "\nAcualización finalizada\n"
+
+echo "\nActualizando las llaves necesarias para instalar koha.\n"
+sudo echo "deb http://debian.koha-community.org/koha stable main" > /etc/apt/sources.list.d/koha.list
+wget -q -O- http://debian.koha-community.org/koha/gpg.asc | apt-key add -
+echo "\nListo para proceder a instalar las dependencias\n"
+
+echo "\nInstalando las dependencias\n"
+sudo apt install apache2 mariadb-client mariadb-server uzip unzip make vim memcached koha-common
+echo "\nDependencias instaladas\n"
+
+echo "\nPreparando el servidor\n"
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+sudo a2enmod cgi
+sudo a2enmod ssl
+sudo systemctl restart apache2
+sudo a2enmod default-ssl
+sudo systemctl reload apache2
+sudo systemctl restart apache2
+
