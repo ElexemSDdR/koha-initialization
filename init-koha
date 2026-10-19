@@ -21,14 +21,12 @@ sudo systemctl enable mariadb
 sudo a2enmod rewrite
 sudo a2enmod cgi
 sudo a2enmod ssl
-sudo a2enmod default-ssl
 
 sudo cp ./koha-sites.conf /etc/koha/
 
 echo "Creando la biblioteca de Koha"
 sudo koha-create --create-db --marcflavor marc21 --zebralang es biblioteca-municipal
 sudo a2enmod cgi
-sudo koha-create --create-db biblioteca-municipal
 sudo koha-translate --install es-ES
 
 echo "Configurando apache"
