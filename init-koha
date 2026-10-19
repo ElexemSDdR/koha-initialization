@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-echo "Actualizando el sistema\n"
+echo "Actualizando el sistema"
 sudo apt update && sudo apt upgrade
-echo "\nAcualización finalizada\n"
+echo "Actualización finalizada"
 
-echo "\nActualizando las llaves necesarias para instalar koha.\n"
-sudo echo "deb http://debian.koha-community.org/koha stable main" > /etc/apt/sources.list.d/koha.list
-wget -q -O- http://debian.koha-community.org/koha/gpg.asc | apt-key add -
-echo "\nListo para proceder a instalar las dependencias\n"
+echo "Instalando las dependencias"
+sudo apt install apache2 mariadb-client mariadb-server zip unzip make vim memcached gnupg
+echo "Dependencias instaladas"
 
-echo "\nInstalando las dependencias\n"
-sudo apt install apache2 mariadb-client mariadb-server uzip unzip make vim memcached koha-common
-echo "\nDependencias instaladas\n"
+echo "Actualizando las llaves necesarias para instalar Koha"
+wget -q -O- http://debian.koha-community.org/koha/gpg.asc | sudo gpg --dearmor -o /usr/share/keyrings/koha-keyring.gpg
+sudo echo "deb [signed-by=/usr/share/keyrings/koha-keyring.gpg] http://debian.koha-community.org/koha stable main" | sudo tee /etc/apt/sources.list.d/koha.list
+echo "Instalando Koha"
+sudo apt install koha-common
+echo "Instalacion de Koha terminada"
 
-echo "\nPreparando el servidor\n"
+echo "Preparando el servidor"
 sudo systemctl start mariadb
 sudo systemctl enable mariadb
 sudo a2enmod rewrite
@@ -23,5 +25,23 @@ sudo a2enmod ssl
 sudo systemctl restart apache2
 sudo a2enmod default-ssl
 sudo systemctl reload apache2
+sudo systemctl restart apache2
+
+sudo cp ./koha-sites.conf /etc/koha/
+
+sudo service koha-common restart && sudo service apache2 restart
+
+echo "Creando la biblioteca de Koha"
+sudo koha-create --create-db --marcflavor marc21 --zebralang es biblioteca-municipal
+sudo a2enmod cgi
+sudo systemctl restart apache2
+sudo koha-create --create-db biblioteca-municipal
+koha-translate --install es-ES
+
+echo "Configurando apache"
+sudo cp ./ports.conf /etc/apache2/
+sudo service koha-common restart && sudo service apache2 restart
+
+sudo a2enmod headers proxy_http
 sudo systemctl restart apache2
 
