@@ -19,29 +19,24 @@ echo "Preparando el servidor"
 sudo systemctl start mariadb
 sudo systemctl enable mariadb
 sudo a2enmod rewrite
-sudo systemctl restart apache2
 sudo a2enmod cgi
 sudo a2enmod ssl
-sudo systemctl restart apache2
 sudo a2enmod default-ssl
-sudo systemctl reload apache2
-sudo systemctl restart apache2
 
 sudo cp ./koha-sites.conf /etc/koha/
-
-sudo service koha-common restart && sudo service apache2 restart
 
 echo "Creando la biblioteca de Koha"
 sudo koha-create --create-db --marcflavor marc21 --zebralang es biblioteca-municipal
 sudo a2enmod cgi
-sudo systemctl restart apache2
 sudo koha-create --create-db biblioteca-municipal
-koha-translate --install es-ES
+sudo koha-translate --install es-ES
 
 echo "Configurando apache"
 sudo cp ./ports.conf /etc/apache2/
-sudo service koha-common restart && sudo service apache2 restart
 
 sudo a2enmod headers proxy_http
+sudo systemctl reload apache2
 sudo systemctl restart apache2
-
+sudo service koha-common restart && sudo service apache2 restart
+echo "Configuracion terminada, ingrese a http://<ip_de_esta_maquina>:8080 e ingrese las siguientes credenciales para iniciar con la instalacion por el navegador: "
+sudo koha-passwd biblioteca-municipal
